@@ -12,7 +12,6 @@
   justify-content: inherit;
   align-items: inherit;
   font-size: 0.85rem;
-  max-width: var(--max-width);
   width: 100%;
   z-index: 2;
   font-family: var(--font-mono);
@@ -43,7 +42,6 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(25%, auto));
   max-width: 100%;
-  width: var(--max-width);
 }
 
 .card {
@@ -51,7 +49,10 @@
   border-radius: var(--border-radius);
   background: rgba(var(--card-rgb), 0);
   border: 1px solid rgba(var(--card-border-rgb), 0);
-  transition: background 200ms, border 200ms, box-shadow 200ms;
+  transition:
+    background 200ms,
+    border 200ms,
+    box-shadow 200ms;
 }
 
 .card span {
@@ -86,7 +87,7 @@
   .card:hover {
     background: rgba(var(--card-rgb), 0.1);
     border: 1px solid rgba(var(--card-border-rgb), 0.15);
-    box-shadow: 0px 4px 12px 0px #CBBEFF;
+    box-shadow: 0px 4px 12px 0px #cbbeff;
   }
 
   .card:hover span {
@@ -195,7 +196,6 @@
     filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
   }
 }
-
 
 @keyframes rotate {
   from {

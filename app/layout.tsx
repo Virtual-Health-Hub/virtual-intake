@@ -27,9 +27,9 @@ const amplifyTheme = {
     colors: {
       brand: {
         primary: {
-          10: "#eef2ff", // dashboard tint
-          80: "#4f46e5", // dashboard hover
-          100: "#4338ca", // dashboard primary
+          10: "#e0f2fe", // dashboard tint
+          80: "#2563eb", // dashboard hover
+          100: "#1d4ed8", // dashboard primary
         },
       },
       font: {
@@ -128,7 +128,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
     <>
       <header className="app-header">
         <div className="container header-inner">
-          <Link href="/dashboard" className="brand">
+          <Link href="/" className="brand">
             <Image
               src="/amplify.svg"
               alt="Virtual Health Hub Logo"
@@ -178,7 +178,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           width: 34px;
           height: 34px;
           border-radius: 50%;
-          background: #4338ca;
+          background: #1d4ed8;
           color: #fff;
           font-weight: 800;
           letter-spacing: 0.5px;
@@ -198,7 +198,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         }
         .nav-link:hover {
           background: #f1f5f9;
-          color: #4338ca;
+          color: #1d4ed8;
           border-color: transparent;
         }
         .logout-button {
@@ -214,7 +214,6 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         }
         .logout-button:hover {
           background: #fee2e2;
-          border: 1px solid #fecaca;
           color: #b91c1c;
         }
         .app-footer {
@@ -251,12 +250,12 @@ export default function RootLayout({
           :root { --bg:#0f172a; --card:#ffffff; --muted:#6b7280; --brand:#2563eb; --line:#e5e7eb; }
           * { box-sizing:border-box; }
           html, body { margin:0; padding:0; background:#f7f7fb; color:#0f172a; }
-          .container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+          .container { width: 100vw; margin: 0 auto; padding: 20px; }
           .header-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
           .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
           .nav { display:flex; gap:14px; align-items:center; }
           .content {
-            min-height: calc(100vh - 64px - 56px);
+            
             padding-top: 144px; /* offset for fixed header height */
             padding-bottom: 76px; /* offset for fixed footer height */
             padding-left: 20px;

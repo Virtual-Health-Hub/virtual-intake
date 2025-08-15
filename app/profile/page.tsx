@@ -229,15 +229,15 @@ export default function ProfilePage() {
       {/* Compliance note */}
       <section className="card subtle">
         <p className="hint">
-          We store only what's necessary for your pre‑visit intake. You can
+          We store only what's necessary for your pre-visit intake. You can
           request an export or deletion from the Settings page.
         </p>
       </section>
 
       <style>{`
-        .profile-page { display:grid; gap: 18px; }
+        .profile-page { display:grid; gap: 18px; width: 100%; }
         .top { display:flex; align-items:center; gap:14px; }
-        .avatar { width:60px; height:60px; border-radius:14px; background:#1d4ed8; color:white; display:grid; place-items:center; font-weight:800; font-size:18px; }
+        .avatar { width:60px; height:60px; border-radius:14px; background:#2563eb; color:white; display:grid; place-items:center; font-weight:800; font-size:18px; }
         .id .muted { color:#64748b; }
         .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 

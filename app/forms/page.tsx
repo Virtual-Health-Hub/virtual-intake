@@ -4,8 +4,25 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 // --- Helpers ---
-const PROVINCES = ["SK"];
-const LANGS = [{ id: "en-CA", label: "English" }];
+const PROVINCES = [
+  "AB",
+  "BC",
+  "MB",
+  "NB",
+  "NL",
+  "NS",
+  "NT",
+  "NU",
+  "ON",
+  "PE",
+  "QC",
+  "SK",
+  "YT",
+];
+const LANGS = [
+  { id: "en-CA", label: "English" },
+  { id: "fr-CA", label: "Français" },
+];
 
 const LS_KEY = "previsit.forms.v1";
 
@@ -505,7 +522,7 @@ export default function FormsPage() {
             }
           />
           <label htmlFor="c2">
-            I acknowledge the clinic's privacy notice and authorize use of my
+            I acknowledge the clinic’s privacy notice and authorize use of my
             information for my care.
           </label>
         </div>
@@ -669,7 +686,7 @@ export default function FormsPage() {
               className="input"
               value={med.vaccinations}
               onChange={(e) => setMed({ ...med, vaccinations: e.target.value })}
-              placeholder="e.g., COVID‑19 booster date"
+              placeholder="e.g., COVID-19 booster date"
             />
           </div>
         </div>
@@ -677,7 +694,7 @@ export default function FormsPage() {
 
       {/* PHQ-9 */}
       <section className="card">
-        <h2>PHQ‑9 (Depression Screening)</h2>
+        <h2>PHQ-9 (Depression Screening)</h2>
         <p className="hint">
           Over the last 2 weeks, how often have you been bothered by any of the
           following problems?
@@ -737,7 +754,7 @@ export default function FormsPage() {
 
       {/* GAD-7 */}
       <section className="card">
-        <h2>GAD‑7 (Anxiety Screening)</h2>
+        <h2>GAD-7 (Anxiety Screening)</h2>
         <p className="hint">
           Over the last 2 weeks, how often have you been bothered by the
           following problems?
@@ -798,28 +815,35 @@ export default function FormsPage() {
       </section>
 
       <style>{`
-        .forms-page { display:grid; gap: 16px; }
-        .hdr { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-        h1 { margin:0; font-size:22px; }
-        h2 { margin:0 0 8px; font-size:16px; }
+        .forms-page { display:grid; gap: 32px; padding: 160px 32px 60px; margin-top: 3rem; background-color: #f9fafb; }
+        .hdr { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; }
+        h1 { margin:0; font-size:28px; font-weight:700; color:#1e293b; }
+        h2 { margin:0 0 16px; font-size:22px; font-weight:700; color:#1f2937; }
         .muted { color:#64748b; }
         .row { display:flex; align-items:center; }
         .row.gap { gap:10px; }
-        .card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:14px; box-shadow: 0 8px 24px rgba(2,6,23,0.04); }
+        .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:28px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
         .card.subtle { background:#f8fafc; }
         .grid.two { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
         @media (max-width: 760px) { .grid.two { grid-template-columns: 1fr; } }
-        .label { display:block; font-weight:600; margin-bottom:6px; }
-        .input { width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+        .label { display:block; font-weight:500; margin-bottom:8px; color:#374151; }
+        .input { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:6px; background:#fff; font-size:14px; }
+        .input:focus { border-color:#2563eb; outline:none; box-shadow:0 0 0 1px #2563eb; }
         textarea.input { resize: vertical; }
-        .hint { color:#64748b; font-size:13px; }
-        .btn { padding:10px 14px; border-radius:10px; font-weight:600; border:1px solid #e5e7eb; background:#fff; }
-        .btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
-        .btn.ghost { background:#fff; }
+        .hint { color:#6b7280; font-size:13px; line-height:1.4; }
+        .btn { padding:10px 16px; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer; transition: all 0.2s ease; }
+        .btn.primary { background:#2563eb; color:#fff; border:1px solid #2563eb; }
+        .btn.primary:hover { background:#1d4ed8; transform: translateY(-1px); }
+        .btn.ghost { background:#fff; color:#1e293b; border:1px solid #d1d5db; }
+        .btn.ghost:hover { background:#f3f4f6; transform: translateY(-1px); }
         table.scale { width:100%; border-collapse: collapse; }
         table.scale th, table.scale td { border:1px solid #e5e7eb; padding:8px; text-align:center; }
+        table.scale th { background:#f3f4f6; font-weight:600; }
         table.scale th:first-child, table.scale td:first-child { text-align:left; }
         .score { margin-top:8px; }
+        section.card { margin-bottom: 24px; }
+        .check { display:flex; align-items:flex-start; gap:8px; margin-bottom:8px; }
+        .check input { margin-top:4px; }
       `}</style>
     </div>
   );

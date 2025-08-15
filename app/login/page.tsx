@@ -27,7 +27,7 @@ function Header() {
         style={{
           fontSize: 24,
           fontWeight: 600,
-          color: "#1e293b",
+          color: "#2563eb",
         }}
       >
         Virtual Intake

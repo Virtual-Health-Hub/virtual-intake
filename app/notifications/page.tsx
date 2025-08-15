@@ -25,7 +25,7 @@ const SEED: NotificationItem[] = [
   {
     id: "n1",
     title: "Welcome to Virtual Health Hub",
-    body: "You can complete your pre‑visit intake online to save time at the clinic.",
+    body: "You can complete your pre-visit intake online to save time at the clinic.",
     read: false,
     createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
     kind: "system",
@@ -34,7 +34,7 @@ const SEED: NotificationItem[] = [
   {
     id: "n2",
     title: "Forms requested",
-    body: "Please complete PHQ‑9 and demographic forms before your visit.",
+    body: "Please complete PHQ-9 and demographic forms before your visit.",
     read: false,
     createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
     kind: "forms",
@@ -279,7 +279,7 @@ export default function NotificationsPage() {
       </section>
 
       <style>{`
-        .notifications-page { display:grid; gap: 16px; }
+        .notifications-page { display:grid; gap: 16px; width: 100%; }
         .hdr { display:flex; align-items:center; justify-content:space-between; }
         h1 { margin:0; font-size:22px; }
         .muted { color:#64748b; }
@@ -291,8 +291,29 @@ export default function NotificationsPage() {
         .card { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:14px; box-shadow: 0 8px 24px rgba(2,6,23,0.04); }
         .prefs .hint { margin-top:8px; color:#64748b; }
 
-        .tab { padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; }
-        .tab.active { background:#f3f4f6; }
+        .tab {
+          padding:8px 10px;
+          border-radius:8px;
+          border:1px solid #cbd5e1;
+          background:#f8fafc;
+          color:#1e293b;
+          font-weight:500;
+          cursor: pointer;
+          transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .tab:hover:not(.active) {
+          background: #e0e7ff;
+          color: #1e293b;
+        }
+        .tab:focus-visible {
+          outline: 2px solid #2563eb;
+          outline-offset: 2px;
+        }
+        .tab.active {
+          background:#2563eb;
+          color:#fff;
+          border-color:#2563eb;
+        }
 
         .list { display:grid; gap:10px; }
         .item { display:grid; grid-template-columns: 10px 1fr; gap:10px; }
@@ -309,9 +330,52 @@ export default function NotificationsPage() {
         .pill.appointment { background:#fff7ed; border-color:#ffedd5; }
         .pill.message { background:#f0fdf4; border-color:#dcfce7; }
 
-        .btn { padding:8px 10px; border-radius:8px; font-weight:600; border:1px solid #e5e7eb; background:#fff; }
-        .btn.small { padding:6px 8px; font-size:12px; }
-        .btn.ghost { background:#fff; }
+        .btn {
+          padding:8px 10px;
+          border-radius:8px;
+          font-weight:600;
+          border:1px solid #cbd5e1;
+          background:#f8fafc;
+          color:#1e293b;
+          cursor: pointer;
+          transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .btn:hover:not(:disabled) {
+          background: #e0e7ff;
+          color: #1e293b;
+          border-color: #a5b4fc;
+        }
+        .btn:focus-visible {
+          outline: 2px solid #2563eb;
+          outline-offset: 2px;
+        }
+        .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .btn.primary {
+          background: #2563eb;
+          color: #fff;
+          border-color: #2563eb;
+        }
+        .btn.primary:hover:not(:disabled) {
+          background: #1e40af;
+          border-color: #1e40af;
+        }
+
+        .btn.small {
+          padding:6px 8px;
+          font-size:12px;
+        }
+        .btn.ghost {
+          background: transparent;
+          color: #1e293b;
+          border-color: transparent;
+        }
+        .btn.ghost:hover:not(:disabled) {
+          background: #e0e7ff;
+          color: #2563eb;
+        }
 
         .empty { text-align:center; color:#64748b; }
 

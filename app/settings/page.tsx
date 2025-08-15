@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { signOut, fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
 // --- Simple local preference keys ---
 const LS_KEYS = {
@@ -112,7 +112,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container settings-page">
+    <div className="settings-page">
       <h1>Settings</h1>
 
       {/* Account */}
@@ -129,11 +129,6 @@ export default function SettingsPage() {
             <label className="label">User ID</label>
             <div className="value mono">{userSub || "—"}</div>
           </div>
-        </div>
-        <div className="row end">
-          <button className="btn ghost" onClick={() => signOut()}>
-            Sign out
-          </button>
         </div>
       </section>
 
@@ -308,7 +303,7 @@ export default function SettingsPage() {
       </section>
 
       <style>{`
-        .settings-page { display:grid; gap: 18px; }
+        .settings-page { display:grid; gap: 18px; padding-top: 16px; margin: 16px 0; width: 100%; }
         h1 { font-size: 22px; margin: 0 0 8px; }
         h2 { font-size: 16px; margin: 0; }
         .card { background:#fff; border:1px solid #e5e7eb; border-radius: 14px; padding: 14px; box-shadow: 0 8px 24px rgba(2,6,23,0.04); }
@@ -325,7 +320,7 @@ export default function SettingsPage() {
         .check { display:flex; align-items:center; gap:8px; }
         .hint { color:#64748b; font-size: 13px; margin-top: 6px; }
         .btn { padding:10px 14px; border-radius:10px; font-weight:600; border:1px solid #e5e7eb; background:#fff; }
-        .btn.primary { background:#4338ca; color:#fff; border-color:#4338ca; }
+        .btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
         .btn.ghost { background:#fff; }
         .btn.danger { background:#ef4444; color:#fff; border-color:#ef4444; }
         @media (max-width: 760px) { .grid.two { grid-template-columns: 1fr; } }

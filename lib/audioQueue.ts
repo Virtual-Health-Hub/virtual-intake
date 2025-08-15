@@ -1,6 +1,7 @@
 interface QueueItem {
   audioBase64: string;
   speechMarks: any[];
+  onViseme: (viseme: string) => void;
 }
 
 const audioQueue: QueueItem[] = [];
@@ -29,23 +30,24 @@ export async function enqueueTTS(
   const queueItem: QueueItem = {
     audioBase64: data.audioBase64,
     speechMarks: data.speechMarks,
+    onViseme,
   };
 
-  audioQueue.push({ ...queueItem, onViseme });
+  audioQueue.push(queueItem);
 
   if (!playing) {
-    playNext(onViseme);
+    playNext();
   }
 }
 
-export function playNext(onViseme: (viseme: string) => void): void {
+export function playNext(): void {
   if (audioQueue.length === 0) {
     playing = false;
     return;
   }
 
   playing = true;
-  const { audioBase64, speechMarks } = audioQueue.shift()!;
+  const { audioBase64, speechMarks, onViseme } = audioQueue.shift()!;
 
   if (currentAudio) {
     currentAudio.pause();
@@ -91,7 +93,7 @@ export function playNext(onViseme: (viseme: string) => void): void {
       cancelAnimationFrame(animationFrameId);
       animationFrameId = null;
     }
-    playNext(onViseme);
+    playNext();
   };
 
   audio.play();

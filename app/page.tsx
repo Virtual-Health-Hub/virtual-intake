@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
@@ -6,8 +7,12 @@ export default function DashboardPage() {
       <header className="dashboard-header">
         <h1>Welcome back, User!</h1>
         <div className="header-buttons">
-          <button className="btn primary">Start Interview</button>
-          <button className="btn secondary">Open Forms</button>
+          <Link href={"/interview"} className="btn primary">
+            Start Interview
+          </Link>
+          <Link href={"/forms"} className="btn secondary">
+            Open Forms
+          </Link>
         </div>
       </header>
 
@@ -37,9 +42,15 @@ export default function DashboardPage() {
         </div>
         <div className="quick-actions">
           <h3>Quick Actions</h3>
-          <button className="btn">New Interview</button>
-          <button className="btn">Review Forms</button>
-          <button className="btn">Settings</button>
+          <Link href="/interview" className="btn">
+            New Interview
+          </Link>
+          <Link href="/forms" className="btn">
+            Review Forms
+          </Link>
+          <Link href="/settings" className="btn">
+            Settings
+          </Link>
         </div>
       </section>
 
@@ -60,7 +71,7 @@ export default function DashboardPage() {
           align-items: center;
           margin-bottom: 2rem;
           background: #fff;
-          border: 1px solid #e5e7eb;
+      
           border-radius: 8px;
           padding: 1.5rem;
           box-shadow: 0 2px 6px rgba(0,0,0,0.05);
@@ -71,8 +82,13 @@ export default function DashboardPage() {
           font-weight: 700;
           color: #1e293b;
         }
-        .header-buttons .btn {
-          margin-left: 1rem;
+        .header-buttons {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          align-items: center;
+        }
+        .header-buttons :global(.btn) {
           padding: 0.75rem 1.5rem;
           font-size: 1rem;
           border-radius: 6px;
@@ -80,10 +96,6 @@ export default function DashboardPage() {
           font-weight: 600;
           transition: background-color 0.2s ease;
         }
-        .btn.primary { background-color: #2563eb; color: white; border: none; }
-        .btn.primary:hover { background-color: #1d4ed8; }
-        .btn.secondary { background-color: #f1f5f9; color: #1e293b; border: none; }
-        .btn.secondary:hover { background-color: #e2e8f0; }
         .kpi-cards {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -140,14 +152,13 @@ export default function DashboardPage() {
           margin: 0;
         }
         .recent-activity li {
-          padding: 0.5rem 0;
-          border-bottom: 1px solid #e5e7eb;
+          padding: 0.5rem;
           color: #475569;
         }
         .recent-activity li:last-child {
           border-bottom: none;
         }
-        .quick-actions .btn {
+        .quick-actions :global(.btn) {
           display: block;
           width: 100%;
           margin-bottom: 1rem;
@@ -162,7 +173,19 @@ export default function DashboardPage() {
           font-weight: 600;
           transition: background-color 0.2s ease;
         }
-        .quick-actions .btn:hover { background-color: #1d4ed8; }
+        .quick-actions :global(.btn):hover { background-color: #1d4ed8; }
+      `}</style>
+      <style jsx global>{`
+        .dashboard .btn {
+          display: inline-block;
+          text-decoration: none;
+          line-height: 1.25;
+        }
+        .dashboard .btn:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+        .dashboard .btn.primary { background-color: #2563eb; color: white; border: none; }
+        .dashboard .btn.primary:hover { background-color: #1d4ed8; }
+        .dashboard .btn.secondary { background-color: #f1f5f9; color: #1e293b; border: none; }
+        .dashboard .btn.secondary:hover { background-color: #e2e8f0; }
       `}</style>
     </main>
   );

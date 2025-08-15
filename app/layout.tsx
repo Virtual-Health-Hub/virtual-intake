@@ -76,7 +76,7 @@ const amplifyTheme = {
 
 const navLinks = [
   { href: "/", label: "Dashboard" },
-  { href: "/chat", label: "Chat" },
+  { href: "/interview", label: "Interview" },
   { href: "/forms", label: "Forms" },
   { href: "/notifications", label: "Notifications" },
   { href: "/profile", label: "Profile" },
@@ -137,11 +137,19 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
             />
           </Link>
           <nav className="nav">
-            {navLinks.map((l) => (
-              <Link key={l.href} className="nav-link" href={l.href}>
-                {l.label}
-              </Link>
-            ))}
+            {navLinks.map((l) => {
+              const isActive = pathname === l.href;
+              return (
+                <Link
+                  key={l.href}
+                  className={`nav-link${isActive ? " active" : ""}`}
+                  href={l.href}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
             <button
               className="nav-link logout-button"
               onClick={handleLogout}
@@ -153,14 +161,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="container content">{children}</main>
-      <footer className="app-footer">
-        <div className="container footer-inner">
-          <span>© {new Date().getFullYear()} Virtual Health Hub</span>
-          <span className="muted">
-            Secure. Private. HIPAA-style safeguards.
-          </span>
-        </div>
-      </footer>
+
       <style>{`
         .app-header {
           position: sticky;
@@ -198,6 +199,11 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
         }
         .nav-link:hover {
           background: #f1f5f9;
+          color: #1d4ed8;
+          border-color: transparent;
+        }
+        .nav-link.active {
+          background: #e0f2fe;
           color: #1d4ed8;
           border-color: transparent;
         }
@@ -255,7 +261,13 @@ export default function RootLayout({
             padding: 84px 20px 24px; /* 64px header + 20px breathing room */
             box-sizing: border-box;
           }
-          .footer-inner { display:flex; gap:12px; align-items:center; justify-content:space-between; height:56px; }
+          /* Global button-like link styles */
+          .btn { display: inline-block; text-decoration: none; line-height: 1.25; padding: 0.75rem 1.5rem; font-weight: 600; border-radius: 6px; transition: background-color 0.2s ease; }
+          .btn:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+          .btn.primary { background: #1d4ed8; color: #ffffff; border: none; }
+          .btn.primary:hover { background: #2563eb; }
+          .btn.secondary { background: #f1f5f9; color: #1e293b; border: none; }
+          .btn.secondary:hover { background: #e2e8f0; }
         `}</style>
       </body>
     </html>

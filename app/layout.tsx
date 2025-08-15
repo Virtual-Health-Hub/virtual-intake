@@ -7,6 +7,7 @@ import "./app.css";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { LogOut } from "lucide-react";
 import {
   useAuthenticator,
   Authenticator,
@@ -154,8 +155,9 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
               className="nav-link logout-button"
               onClick={handleLogout}
               type="button"
+              title="Logout"
             >
-              Logout
+              <LogOut size={28} aria-hidden="true" />
             </button>
           </nav>
         </div>
@@ -217,6 +219,9 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           font: inherit;
           font-weight: 500;
           transition: background-color 0.2s ease, border-color 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
         }
         .logout-button:hover {
           background: #fee2e2;

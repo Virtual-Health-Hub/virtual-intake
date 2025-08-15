@@ -10,7 +10,7 @@ export default function Landing() {
       <section className="hero">
         <div className="hero-grid">
           <div className="hero-copy">
-            <h1>Start your pre‑visit interview online</h1>
+            <h1>Start your pre-visit interview online</h1>
             <p className="lead">
               Save time at the clinic. Our secure AI assistant guides you
               through a short, adaptive interview and required forms—so your
@@ -38,11 +38,11 @@ export default function Landing() {
               </div>
               <div className="chat">
                 <div className="bubble ai">
-                  Hello! I’ll help collect your pre‑visit details. What brings
+                  Hello! I'll help collect your pre-visit details. What brings
                   you in today?
                 </div>
                 <div className="bubble user">
-                  I’ve had a persistent cough for a week.
+                  I've had a persistent cough for a week.
                 </div>
                 <div className="bubble ai">
                   Thanks. Any fever, chest pain, or shortness of breath?
@@ -66,7 +66,7 @@ export default function Landing() {
           <div className="card">
             <h3>Required Forms</h3>
             <p>
-              PHQ‑9, GAD‑7, demographics, and consents—organized and ready for
+              PHQ-9, GAD-7, demographics, and consents—organized and ready for
               review.
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function Landing() {
             </p>
           </div>
           <div className="card">
-            <h3>Clinic‑Ready Summary</h3>
+            <h3>Clinic-Ready Summary</h3>
             <p>
               Concise handoff including symptoms, timeline, meds/allergies, and
               risk notes.

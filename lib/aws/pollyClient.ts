@@ -47,7 +47,8 @@ export async function synthesizeWithVisemes(
   opts: SynthesizeOptions = {}
 ): Promise<PollySynthesisResult> {
   const client = pollyClient();
-  const voiceId = opts.voiceId ?? "Joanna";
+  const defaultVoice: VoiceId = "Joanna" as VoiceId;
+  const voiceId: VoiceId = (opts.voiceId ?? defaultVoice) as VoiceId;
   const engine = opts.engine ?? "neural";
   const outputFormat = opts.outputFormat ?? "mp3";
   const sampleRate =

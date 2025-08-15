@@ -13,7 +13,7 @@ const bedrock = new BedrockRuntimeClient({
 });
 
 const DEFAULT_MODEL_ID =
-  process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20240620-v1:0";
+  process.env.BEDROCK_MODEL_ID || "openai.gpt-oss-120b-1:0";
 
 export async function POST(req: NextRequest) {
   let body: any;

@@ -163,10 +163,10 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
       </footer>
       <style>{`
         .app-header {
-          position: fixed;
+          position: sticky;
           top: 0;
           left: 0;
-          width: 100vw;
+          width: 100%;
           z-index: 50;
           background: #fff;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -217,10 +217,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           color: #b91c1c;
         }
         .app-footer {
-          width: 100vw;
-          left: 0;
-          position: fixed;
-          bottom: 0;
+          width: 100%;
           border-top: 1px solid var(--line);
           background: #f8fafc;
         }
@@ -250,16 +247,12 @@ export default function RootLayout({
           :root { --bg:#0f172a; --card:#ffffff; --muted:#6b7280; --brand:#2563eb; --line:#e5e7eb; }
           * { box-sizing:border-box; }
           html, body { margin:0; padding:0; background:#f7f7fb; color:#0f172a; }
-          .container { width: 100vw; margin: 0 auto; padding: 20px; }
+          .container { width: 100vw; height: 100vh; margin: 0 auto; padding: 20px; }
           .header-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
           .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
           .nav { display:flex; gap:14px; align-items:center; }
           .content {
-            
-            padding-top: 144px; /* offset for fixed header height */
-            padding-bottom: 76px; /* offset for fixed footer height */
-            padding-left: 20px;
-            padding-right: 20px;
+            padding: 84px 20px 24px; /* 64px header + 20px breathing room */
             box-sizing: border-box;
           }
           .footer-inner { display:flex; gap:12px; align-items:center; justify-content:space-between; height:56px; }

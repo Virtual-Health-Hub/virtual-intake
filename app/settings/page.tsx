@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-
-import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
-
 // --- Simple local preference keys ---
 const LS_KEYS = {
   voiceId: "pref.voiceId",
@@ -31,23 +28,6 @@ const LANGS = [
 ];
 
 export default function SettingsPage() {
-  // Account
-  const [userEmail, setUserEmail] = useState<string>("");
-  const [userSub, setUserSub] = useState<string>("");
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const me = await getCurrentUser();
-        setUserSub(me.userId);
-        // Pull email from tokens if available
-        const session = await fetchAuthSession();
-        const email = (session.tokens?.idToken?.payload?.email as string) || "";
-        setUserEmail(email);
-      } catch {}
-    })();
-  }, []);
-
   // Preferences (load from localStorage)
   const [voiceId, setVoiceId] = useState<string>(VOICES[0].id);
   const [language, setLanguage] = useState<string>(LANGS[0].id);
@@ -114,23 +94,6 @@ export default function SettingsPage() {
   return (
     <div className="settings-page">
       <h1>Settings</h1>
-
-      {/* Account */}
-      <section className="card">
-        <header>
-          <h2>Account</h2>
-        </header>
-        <div className="grid two">
-          <div>
-            <label className="label">Email</label>
-            <div className="value">{userEmail || "—"}</div>
-          </div>
-          <div>
-            <label className="label">User ID</label>
-            <div className="value mono">{userSub || "—"}</div>
-          </div>
-        </div>
-      </section>
 
       {/* Preferences */}
       <section className="card">
@@ -303,7 +266,7 @@ export default function SettingsPage() {
       </section>
 
       <style>{`
-        .settings-page { display:grid; gap: 18px; padding-top: 16px; margin: 16px 0; width: 100%; }
+        .settings-page { display:grid; gap: 18px; padding: 32px; overflow-y: auto; }
         h1 { font-size: 22px; margin: 0 0 8px; }
         h2 { font-size: 16px; margin: 0; }
         .card { background:#fff; border:1px solid #e5e7eb; border-radius: 14px; padding: 14px; box-shadow: 0 8px 24px rgba(2,6,23,0.04); }

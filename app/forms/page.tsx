@@ -1,31 +1,46 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
-// --- Helpers ---
-const PROVINCES = [
-  "AB",
-  "BC",
-  "MB",
-  "NB",
-  "NL",
-  "NS",
-  "NT",
-  "NU",
-  "ON",
-  "PE",
-  "QC",
-  "SK",
-  "YT",
+// --- Constants ---
+const PROVINCES = ["SK"]; // Saskatchewan only
+const LANGS = [{ id: "en-CA", label: "English" }];
+const ROS_OPTIONS = [
+  "Fever",
+  "Chills",
+  "Fatigue",
+  "Sore throat",
+  "Ear pain",
+  "Cough",
+  "Shortness of breath",
+  "Chest pain",
+  "Palpitations",
+  "Abdominal pain",
+  "Nausea/Vomiting",
+  "Diarrhea",
+  "Constipation",
+  "Urinary symptoms",
+  "Back pain",
+  "Joint pain",
+  "Rash/Skin changes",
+  "Headache",
+  "Dizziness",
+  "Eye redness/irritation",
 ];
-const LANGS = [
-  { id: "en-CA", label: "English" },
-  { id: "fr-CA", label: "Français" },
+const CHRONIC_OPTIONS = [
+  "Hypertension",
+  "Diabetes",
+  "Asthma",
+  "COPD",
+  "Coronary artery disease",
+  "Chronic kidney disease",
+  "Cancer",
+  "Thyroid disorder",
+  "Depression/Anxiety",
 ];
+const LS_KEY = "previsit.forms.primary.v1";
 
-const LS_KEY = "previsit.forms.v1";
-
+// --- Types ---
 type Demographics = {
   firstName: string;
   lastName: string;
@@ -64,7 +79,9 @@ type Symptoms = {
   chiefComplaint: string;
   onsetDate: string;
   duration: string;
-  severity: string;
+  severity: string; // Mild / Moderate / Severe
+  painScore: number; // 0-10
+  painLocation: string;
   notes: string;
 };
 
@@ -73,6 +90,8 @@ type History = {
   surgeries: string;
   familyHistory: string;
   socialHistory: string;
+  chronicSelected: string[];
+  chronicOther: string;
 };
 
 type MedAllergy = {
@@ -81,41 +100,49 @@ type MedAllergy = {
   vaccinations: string;
 };
 
-type PHQ9 = number[]; // 9 items 0–3
+type Vitals = {
+  heightCm?: string;
+  weightKg?: string;
+  tempC?: string;
+  bpSys?: string;
+  bpDia?: string;
+  pulse?: string;
+};
 
-type GAD7 = number[]; // 7 items 0–3
+type Exposure = {
+  recentTravel: boolean;
+  travelWhere: string;
+  covidSymptoms: boolean;
+  covidExposure: boolean;
+};
 
-function clamp(n: number, lo: number, hi: number) {
-  return Math.max(lo, Math.min(hi, n));
-}
+type Injury = {
+  workInjury: boolean;
+  wcbNumber: string;
+  mva: boolean;
+  insurer: string;
+  claimNumber: string;
+};
 
+type Pharmacy = {
+  name: string;
+  phone: string;
+  address: string;
+};
+
+type Preferences = {
+  preferredContact: "phone" | "email" | "sms" | "none";
+  interpreterNeeded: boolean;
+  accessibilityNotes: string;
+};
+
+// --- Helpers ---
 function postalMask(v: string) {
   return v
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "")
     .replace(/(.{3})(.)/, "$1 $2")
     .slice(0, 7);
-}
-
-function scorePHQ9(items: PHQ9) {
-  return items.reduce((a, b) => a + (b || 0), 0);
-}
-function scoreGAD7(items: GAD7) {
-  return items.reduce((a, b) => a + (b || 0), 0);
-}
-
-function phqSeverity(score: number) {
-  if (score <= 4) return "Minimal";
-  if (score <= 9) return "Mild";
-  if (score <= 14) return "Moderate";
-  if (score <= 19) return "Moderately severe";
-  return "Severe";
-}
-function gadSeverity(score: number) {
-  if (score <= 4) return "Minimal";
-  if (score <= 9) return "Mild";
-  if (score <= 14) return "Moderate";
-  return "Severe";
 }
 
 // --- Page ---
@@ -154,6 +181,8 @@ export default function FormsPage() {
     onsetDate: "",
     duration: "",
     severity: "",
+    painScore: 0,
+    painLocation: "",
     notes: "",
   });
   const [hist, setHist] = useState<History>({
@@ -161,17 +190,39 @@ export default function FormsPage() {
     surgeries: "",
     familyHistory: "",
     socialHistory: "",
+    chronicSelected: [],
+    chronicOther: "",
   });
   const [med, setMed] = useState<MedAllergy>({
     medications: "",
     allergies: "",
     vaccinations: "",
   });
-  const [phq, setPhq] = useState<PHQ9>(Array(9).fill(0));
-  const [gad, setGad] = useState<GAD7>(Array(7).fill(0));
-
-  const phqScore = useMemo(() => scorePHQ9(phq), [phq]);
-  const gadScore = useMemo(() => scoreGAD7(gad), [gad]);
+  const [vitals, setVitals] = useState<Vitals>({});
+  const [exposure, setExposure] = useState<Exposure>({
+    recentTravel: false,
+    travelWhere: "",
+    covidSymptoms: false,
+    covidExposure: false,
+  });
+  const [injury, setInjury] = useState<Injury>({
+    workInjury: false,
+    wcbNumber: "",
+    mva: false,
+    insurer: "",
+    claimNumber: "",
+  });
+  const [pharmacy, setPharmacy] = useState<Pharmacy>({
+    name: "",
+    phone: "",
+    address: "",
+  });
+  const [prefs, setPrefs] = useState<Preferences>({
+    preferredContact: "phone",
+    interpreterNeeded: false,
+    accessibilityNotes: "",
+  });
+  const [rosSelected, setRosSelected] = useState<string[]>([]);
 
   // Load/save draft
   useEffect(() => {
@@ -186,15 +237,33 @@ export default function FormsPage() {
         setSym(data.sym ?? sym);
         setHist(data.hist ?? hist);
         setMed(data.med ?? med);
-        setPhq(data.phq ?? phq);
-        setGad(data.gad ?? gad);
+        setVitals(data.vitals ?? vitals);
+        setExposure(data.exposure ?? exposure);
+        setInjury(data.injury ?? injury);
+        setPharmacy(data.pharmacy ?? pharmacy);
+        setPrefs(data.prefs ?? prefs);
+        setRosSelected(data.rosSelected ?? rosSelected);
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function saveDraft() {
-    const data = { demo, contact, coverage, consent, sym, hist, med, phq, gad };
+    const data = {
+      demo,
+      contact,
+      coverage,
+      consent,
+      sym,
+      hist,
+      med,
+      vitals,
+      exposure,
+      injury,
+      pharmacy,
+      prefs,
+      rosSelected,
+    };
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(data));
       alert("Draft saved locally.");
@@ -203,8 +272,7 @@ export default function FormsPage() {
     }
   }
 
-  async function submitAll() {
-    // Basic required checks
+  function submitAll() {
     if (
       !demo.firstName ||
       !demo.lastName ||
@@ -222,7 +290,7 @@ export default function FormsPage() {
       alert("Please provide consent to proceed.");
       return;
     }
-    // Placeholder submit — here you would POST to your API/AppSync mutation.
+
     console.log("Submitting forms:", {
       demo,
       contact,
@@ -231,21 +299,24 @@ export default function FormsPage() {
       sym,
       hist,
       med,
-      phq,
-      gad,
-      phqScore,
-      gadScore,
+      vitals,
+      exposure,
+      injury,
+      pharmacy,
+      prefs,
+      rosSelected,
     });
     alert(
-      "Submitted. Thank you! You can return to the Chat to continue your interview."
+      "Submitted. Thank you! You can return to Chat to continue your interview."
     );
   }
 
+  // --- UI ---
   return (
     <div className="forms-page">
       <header className="hdr">
         <div>
-          <h1>Required Forms</h1>
+          <h1>Pre‑Visit Forms (Primary Care)</h1>
           <p className="muted">
             Complete these before your Canadian clinic visit. You can save a
             draft and finish later.
@@ -549,9 +620,9 @@ export default function FormsPage() {
         </p>
       </section>
 
-      {/* Symptoms */}
+      {/* Presenting Problem & Triage */}
       <section className="card">
-        <h2>Symptoms</h2>
+        <h2>Presenting Problem</h2>
         <div className="grid two">
           <div style={{ gridColumn: "1 / -1" }}>
             <label className="label">Chief complaint</label>
@@ -595,6 +666,34 @@ export default function FormsPage() {
               <option>Severe</option>
             </select>
           </div>
+          <div>
+            <label className="label">Pain score (0–10)</label>
+            <input
+              type="number"
+              min={0}
+              max={10}
+              className="input"
+              value={sym.painScore}
+              onChange={(e) =>
+                setSym({
+                  ...sym,
+                  painScore: Math.max(
+                    0,
+                    Math.min(10, Number(e.target.value || 0))
+                  ),
+                })
+              }
+            />
+          </div>
+          <div>
+            <label className="label">Pain location</label>
+            <input
+              className="input"
+              value={sym.painLocation}
+              onChange={(e) => setSym({ ...sym, painLocation: e.target.value })}
+              placeholder="e.g., left ear, lower back"
+            />
+          </div>
           <div style={{ gridColumn: "1 / -1" }}>
             <label className="label">Notes</label>
             <textarea
@@ -607,10 +706,251 @@ export default function FormsPage() {
         </div>
       </section>
 
-      {/* History */}
+      {/* Review of Systems */}
+      <section className="card">
+        <h2>Review of Systems</h2>
+        <p className="hint">Select any symptoms you are experiencing now.</p>
+        <div className="chips">
+          {ROS_OPTIONS.map((opt) => (
+            <label
+              key={opt}
+              className={`chip ${rosSelected.includes(opt) ? "active" : ""}`}
+            >
+              <input
+                type="checkbox"
+                checked={rosSelected.includes(opt)}
+                onChange={(e) => {
+                  setRosSelected((prev) =>
+                    e.target.checked
+                      ? [...prev, opt]
+                      : prev.filter((x) => x !== opt)
+                  );
+                }}
+              />
+              {opt}
+            </label>
+          ))}
+        </div>
+      </section>
+
+      {/* Vitals (self-reported) */}
+      <section className="card">
+        <h2>Vitals (optional, self‑reported)</h2>
+        <div className="grid two">
+          <div>
+            <label className="label">Height (cm)</label>
+            <input
+              className="input"
+              value={vitals.heightCm || ""}
+              onChange={(e) =>
+                setVitals({ ...vitals, heightCm: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label className="label">Weight (kg)</label>
+            <input
+              className="input"
+              value={vitals.weightKg || ""}
+              onChange={(e) =>
+                setVitals({ ...vitals, weightKg: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label className="label">Temperature (°C)</label>
+            <input
+              className="input"
+              value={vitals.tempC || ""}
+              onChange={(e) => setVitals({ ...vitals, tempC: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="label">Blood pressure (mmHg)</label>
+            <div className="row gap">
+              <input
+                className="input"
+                placeholder="Systolic"
+                value={vitals.bpSys || ""}
+                onChange={(e) =>
+                  setVitals({ ...vitals, bpSys: e.target.value })
+                }
+              />
+              <input
+                className="input"
+                placeholder="Diastolic"
+                value={vitals.bpDia || ""}
+                onChange={(e) =>
+                  setVitals({ ...vitals, bpDia: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <div>
+            <label className="label">Pulse (bpm)</label>
+            <input
+              className="input"
+              value={vitals.pulse || ""}
+              onChange={(e) => setVitals({ ...vitals, pulse: e.target.value })}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Exposure / Infectious */}
+      <section className="card">
+        <h2>Recent Travel & Illness Exposure</h2>
+        <div className="grid two">
+          <div className="check">
+            <input
+              id="t1"
+              type="checkbox"
+              checked={exposure.recentTravel}
+              onChange={(e) =>
+                setExposure({ ...exposure, recentTravel: e.target.checked })
+              }
+            />
+            <label htmlFor="t1">
+              I have travelled outside my province/territory in the last 30 days
+            </label>
+          </div>
+          <div>
+            <label className="label">If yes, where?</label>
+            <input
+              className="input"
+              value={exposure.travelWhere}
+              onChange={(e) =>
+                setExposure({ ...exposure, travelWhere: e.target.value })
+              }
+            />
+          </div>
+          <div className="check">
+            <input
+              id="t2"
+              type="checkbox"
+              checked={exposure.covidSymptoms}
+              onChange={(e) =>
+                setExposure({ ...exposure, covidSymptoms: e.target.checked })
+              }
+            />
+            <label htmlFor="t2">I have cold/flu/COVID‑like symptoms</label>
+          </div>
+          <div className="check">
+            <input
+              id="t3"
+              type="checkbox"
+              checked={exposure.covidExposure}
+              onChange={(e) =>
+                setExposure({ ...exposure, covidExposure: e.target.checked })
+              }
+            />
+            <label htmlFor="t3">
+              I’ve been exposed to someone who is ill (known COVID/flu)
+            </label>
+          </div>
+        </div>
+      </section>
+
+      {/* Injury / WCB / MVA */}
+      <section className="card">
+        <h2>Injury / Work or Motor Vehicle</h2>
+        <div className="grid two">
+          <div className="check">
+            <input
+              id="w1"
+              type="checkbox"
+              checked={injury.workInjury}
+              onChange={(e) =>
+                setInjury({ ...injury, workInjury: e.target.checked })
+              }
+            />
+            <label htmlFor="w1">This is a work‑related injury</label>
+          </div>
+          <div>
+            <label className="label">WCB claim # (if applicable)</label>
+            <input
+              className="input"
+              value={injury.wcbNumber}
+              onChange={(e) =>
+                setInjury({ ...injury, wcbNumber: e.target.value })
+              }
+            />
+          </div>
+          <div className="check">
+            <input
+              id="m1"
+              type="checkbox"
+              checked={injury.mva}
+              onChange={(e) => setInjury({ ...injury, mva: e.target.checked })}
+            />
+            <label htmlFor="m1">
+              This is related to a motor vehicle accident
+            </label>
+          </div>
+          <div>
+            <label className="label">Insurer / Claim # (if applicable)</label>
+            <input
+              className="input"
+              value={injury.insurer}
+              onChange={(e) =>
+                setInjury({ ...injury, insurer: e.target.value })
+              }
+              placeholder="Insurer name"
+            />
+            <input
+              className="input"
+              style={{ marginTop: 8 }}
+              value={injury.claimNumber}
+              onChange={(e) =>
+                setInjury({ ...injury, claimNumber: e.target.value })
+              }
+              placeholder="Claim number"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Medical History */}
       <section className="card">
         <h2>Medical History</h2>
         <div className="grid two">
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="label">Chronic conditions (select any)</label>
+            <div className="chips">
+              {CHRONIC_OPTIONS.map((opt) => (
+                <label
+                  key={opt}
+                  className={`chip ${
+                    hist.chronicSelected.includes(opt) ? "active" : ""
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={hist.chronicSelected.includes(opt)}
+                    onChange={(e) =>
+                      setHist((prev) => ({
+                        ...prev,
+                        chronicSelected: e.target.checked
+                          ? [...prev.chronicSelected, opt]
+                          : prev.chronicSelected.filter((x) => x !== opt),
+                      }))
+                    }
+                  />
+                  {opt}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="label">Other chronic conditions</label>
+            <input
+              className="input"
+              value={hist.chronicOther}
+              onChange={(e) =>
+                setHist({ ...hist, chronicOther: e.target.value })
+              }
+            />
+          </div>
           <div style={{ gridColumn: "1 / -1" }}>
             <label className="label">Current or past conditions</label>
             <textarea
@@ -686,123 +1026,97 @@ export default function FormsPage() {
               className="input"
               value={med.vaccinations}
               onChange={(e) => setMed({ ...med, vaccinations: e.target.value })}
-              placeholder="e.g., COVID-19 booster date"
+              placeholder="e.g., COVID‑19 booster date"
             />
           </div>
         </div>
       </section>
 
-      {/* PHQ-9 */}
+      {/* Pharmacy */}
       <section className="card">
-        <h2>PHQ-9 (Depression Screening)</h2>
-        <p className="hint">
-          Over the last 2 weeks, how often have you been bothered by any of the
-          following problems?
-        </p>
-        <table className="scale">
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>Not at all (0)</th>
-              <th>Several days (1)</th>
-              <th>More than half the days (2)</th>
-              <th>Nearly every day (3)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              "Little interest or pleasure in doing things",
-              "Feeling down, depressed, or hopeless",
-              "Trouble falling or staying asleep, or sleeping too much",
-              "Feeling tired or having little energy",
-              "Poor appetite or overeating",
-              "Feeling bad about yourself — or that you are a failure or have let yourself or your family down",
-              "Trouble concentrating on things, such as reading or watching television",
-              "Moving or speaking so slowly that other people could have noticed. Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual",
-              "Thoughts that you would be better off dead or of hurting yourself in some way",
-            ].map((q, i) => (
-              <tr key={i}>
-                <td>{q}</td>
-                {[0, 1, 2, 3].map((v) => (
-                  <td key={v}>
-                    <input
-                      type="radio"
-                      name={`phq${i}`}
-                      checked={phq[i] === v}
-                      onChange={() =>
-                        setPhq((p) => {
-                          const c = [...p];
-                          c[i] = v;
-                          return c;
-                        })
-                      }
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="score">
-          Score: <b>{phqScore}</b> — {phqSeverity(phqScore)}
+        <h2>Preferred Pharmacy</h2>
+        <div className="grid two">
+          <div>
+            <label className="label">Pharmacy name</label>
+            <input
+              className="input"
+              value={pharmacy.name}
+              onChange={(e) =>
+                setPharmacy({ ...pharmacy, name: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <label className="label">Pharmacy phone</label>
+            <input
+              className="input"
+              value={pharmacy.phone}
+              onChange={(e) =>
+                setPharmacy({ ...pharmacy, phone: e.target.value })
+              }
+              placeholder="+1XXXXXXXXXX"
+            />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="label">Pharmacy address</label>
+            <input
+              className="input"
+              value={pharmacy.address}
+              onChange={(e) =>
+                setPharmacy({ ...pharmacy, address: e.target.value })
+              }
+            />
+          </div>
         </div>
-        <p className="hint">
-          If you are in crisis or thinking about harming yourself, call 911 or
-          your local emergency number right away.
-        </p>
       </section>
 
-      {/* GAD-7 */}
+      {/* Preferences & Accessibility */}
       <section className="card">
-        <h2>GAD-7 (Anxiety Screening)</h2>
-        <p className="hint">
-          Over the last 2 weeks, how often have you been bothered by the
-          following problems?
-        </p>
-        <table className="scale">
-          <thead>
-            <tr>
-              <th>Question</th>
-              <th>Not at all (0)</th>
-              <th>Several days (1)</th>
-              <th>More than half the days (2)</th>
-              <th>Nearly every day (3)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              "Feeling nervous, anxious, or on edge",
-              "Not being able to stop or control worrying",
-              "Worrying too much about different things",
-              "Trouble relaxing",
-              "Being so restless that it is hard to sit still",
-              "Becoming easily annoyed or irritable",
-              "Feeling afraid as if something awful might happen",
-            ].map((q, i) => (
-              <tr key={i}>
-                <td>{q}</td>
-                {[0, 1, 2, 3].map((v) => (
-                  <td key={v}>
-                    <input
-                      type="radio"
-                      name={`gad${i}`}
-                      checked={gad[i] === v}
-                      onChange={() =>
-                        setGad((g) => {
-                          const c = [...g];
-                          c[i] = v;
-                          return c;
-                        })
-                      }
-                    />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="score">
-          Score: <b>{gadScore}</b> — {gadSeverity(gadScore)}
+        <h2>Preferences & Accessibility</h2>
+        <div className="grid two">
+          <div>
+            <label className="label">Preferred contact</label>
+            <select
+              className="input"
+              value={prefs.preferredContact}
+              onChange={(e) =>
+                setPrefs({
+                  ...prefs,
+                  preferredContact: e.target
+                    .value as Preferences["preferredContact"],
+                })
+              }
+            >
+              <option value="phone">Phone</option>
+              <option value="email">Email</option>
+              <option value="sms">Text (SMS)</option>
+              <option value="none">No preference</option>
+            </select>
+          </div>
+          <div className="check">
+            <input
+              id="i1"
+              type="checkbox"
+              checked={prefs.interpreterNeeded}
+              onChange={(e) =>
+                setPrefs({ ...prefs, interpreterNeeded: e.target.checked })
+              }
+            />
+            <label htmlFor="i1">Interpreter needed</label>
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label className="label">
+              Accessibility needs (mobility, hearing, vision, other)
+            </label>
+            <textarea
+              className="input"
+              rows={3}
+              value={prefs.accessibilityNotes}
+              onChange={(e) =>
+                setPrefs({ ...prefs, accessibilityNotes: e.target.value })
+              }
+            />
+          </div>
         </div>
       </section>
 
@@ -815,14 +1129,14 @@ export default function FormsPage() {
       </section>
 
       <style>{`
-        .forms-page { display:grid; gap: 32px; padding: 160px 32px 60px; margin-top: 3rem; background-color: #f9fafb; }
+        .forms-page { display:grid; gap: 32px; padding:32px; background-color: #f9fafb; }
         .hdr { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; }
         h1 { margin:0; font-size:28px; font-weight:700; color:#1e293b; }
         h2 { margin:0 0 16px; font-size:22px; font-weight:700; color:#1f2937; }
         .muted { color:#64748b; }
         .row { display:flex; align-items:center; }
         .row.gap { gap:10px; }
-        .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:28px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:28px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); overflow: visible; }
         .card.subtle { background:#f8fafc; }
         .grid.two { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
         @media (max-width: 760px) { .grid.two { grid-template-columns: 1fr; } }
@@ -836,14 +1150,12 @@ export default function FormsPage() {
         .btn.primary:hover { background:#1d4ed8; transform: translateY(-1px); }
         .btn.ghost { background:#fff; color:#1e293b; border:1px solid #d1d5db; }
         .btn.ghost:hover { background:#f3f4f6; transform: translateY(-1px); }
-        table.scale { width:100%; border-collapse: collapse; }
-        table.scale th, table.scale td { border:1px solid #e5e7eb; padding:8px; text-align:center; }
-        table.scale th { background:#f3f4f6; font-weight:600; }
-        table.scale th:first-child, table.scale td:first-child { text-align:left; }
-        .score { margin-top:8px; }
-        section.card { margin-bottom: 24px; }
         .check { display:flex; align-items:flex-start; gap:8px; margin-bottom:8px; }
         .check input { margin-top:4px; }
+        .chips { display:flex; flex-wrap:wrap; gap:8px; }
+        .chip { display:inline-flex; align-items:center; gap:6px; padding:8px 10px; border:1px solid #e5e7eb; border-radius:999px; background:#fff; color:#1e293b; cursor:pointer; user-select:none; }
+        .chip input { display:none; }
+        .chip.active { background:#2563eb; color:#fff; border-color:#2563eb; }
       `}</style>
     </div>
   );

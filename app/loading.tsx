@@ -33,7 +33,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: "50px",
     height: "50px",
     border: "5px solid #e5e7eb",
-    borderTop: "5px solid #4338ca", // dashboard primary
+    borderTop: "5px solid #2563eb", // dashboard primary
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },

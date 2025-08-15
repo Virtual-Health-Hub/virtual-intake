@@ -235,8 +235,8 @@ export default function ProfilePage() {
       </section>
 
       <style>{`
-        .profile-page { display:grid; gap: 18px; width: 100%; }
-        .top { display:flex; align-items:center; gap:14px; }
+        .profile-page { display:flex; flex-direction: column; gap: 18px; padding: 32px; box-sizing: border-box; }
+        .top { display:flex; align-items:center; gap:14px; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:14px; box-shadow: 0 8px 24px rgba(2,6,23,0.04); }
         .avatar { width:60px; height:60px; border-radius:14px; background:#2563eb; color:white; display:grid; place-items:center; font-weight:800; font-size:18px; }
         .id .muted { color:#64748b; }
         .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }

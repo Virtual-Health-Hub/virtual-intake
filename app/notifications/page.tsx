@@ -279,7 +279,7 @@ export default function NotificationsPage() {
       </section>
 
       <style>{`
-        .notifications-page { display:grid; gap: 16px; width: 100%; }
+        .notifications-page { display:grid; gap: 16px; padding: 32px; width: 100%; }
         .hdr { display:flex; align-items:center; justify-content:space-between; }
         h1 { margin:0; font-size:22px; }
         .muted { color:#64748b; }

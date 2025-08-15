@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import https from "https";
-import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
+import {
+  PollyClient,
+  SynthesizeSpeechCommand,
+  type VoiceId,
+} from "@aws-sdk/client-polly";
 import { NodeHttpHandler } from "@smithy/node-http-handler";
 
 const agent = new https.Agent({ keepAlive: true, maxSockets: 64 });
@@ -10,7 +14,8 @@ const polly = new PollyClient({
 });
 
 export async function POST(req: NextRequest) {
-  const { text, voiceId = "Joanna" } = await req.json();
+  const { text, voiceId: voiceIdInput } = await req.json();
+  const voiceId: VoiceId = (voiceIdInput ?? "Joanna") as VoiceId;
 
   const audioCmd = new SynthesizeSpeechCommand({
     Text: text,

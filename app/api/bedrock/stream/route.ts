@@ -12,6 +12,9 @@ const bedrock = new BedrockRuntimeClient({
   requestHandler: new NodeHttpHandler({ httpsAgent: agent }),
 });
 
+const DEFAULT_MODEL_ID =
+  process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20240620-v1:0";
+
 export async function POST(req: NextRequest) {
   let body: any;
   try {
@@ -25,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   const {
     prompt,
-    modelId = "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    modelId = DEFAULT_MODEL_ID,
     maxTokens = 512,
     temperature = 0.2,
   } = body || {};

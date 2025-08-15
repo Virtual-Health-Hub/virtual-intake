@@ -4,25 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 // --- Helpers ---
-const PROVINCES = [
-  "AB",
-  "BC",
-  "MB",
-  "NB",
-  "NL",
-  "NS",
-  "NT",
-  "NU",
-  "ON",
-  "PE",
-  "QC",
-  "SK",
-  "YT",
-];
-const LANGS = [
-  { id: "en-CA", label: "English" },
-  { id: "fr-CA", label: "Français" },
-];
+const PROVINCES = ["SK"];
+const LANGS = [{ id: "en-CA", label: "English" }];
 
 const LS_KEY = "previsit.forms.v1";
 
@@ -522,7 +505,7 @@ export default function FormsPage() {
             }
           />
           <label htmlFor="c2">
-            I acknowledge the clinic’s privacy notice and authorize use of my
+            I acknowledge the clinic's privacy notice and authorize use of my
             information for my care.
           </label>
         </div>

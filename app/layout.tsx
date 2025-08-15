@@ -163,8 +163,10 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
       </footer>
       <style>{`
         .app-header {
-          position: sticky;
+          position: fixed;
           top: 0;
+          left: 0;
+          width: 100vw;
           z-index: 50;
           background: #fff;
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -216,6 +218,10 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           color: #b91c1c;
         }
         .app-footer {
+          width: 100vw;
+          left: 0;
+          position: fixed;
+          bottom: 0;
           border-top: 1px solid var(--line);
           background: #f8fafc;
         }
@@ -249,7 +255,14 @@ export default function RootLayout({
           .header-inner { display:flex; align-items:center; justify-content:space-between; height:64px; }
           .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
           .nav { display:flex; gap:14px; align-items:center; }
-          .content { min-height: calc(100vh - 64px - 56px); padding: 20px; }
+          .content {
+            min-height: calc(100vh - 64px - 56px);
+            padding-top: 144px; /* offset for fixed header height */
+            padding-bottom: 76px; /* offset for fixed footer height */
+            padding-left: 20px;
+            padding-right: 20px;
+            box-sizing: border-box;
+          }
           .footer-inner { display:flex; gap:12px; align-items:center; justify-content:space-between; height:56px; }
         `}</style>
       </body>

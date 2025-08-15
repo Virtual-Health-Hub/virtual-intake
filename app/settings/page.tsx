@@ -112,7 +112,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="settings-page">
+    <div className="container settings-page">
       <h1>Settings</h1>
 
       {/* Account */}
@@ -313,7 +313,7 @@ export default function SettingsPage() {
         h2 { font-size: 16px; margin: 0; }
         .card { background:#fff; border:1px solid #e5e7eb; border-radius: 14px; padding: 14px; box-shadow: 0 8px 24px rgba(2,6,23,0.04); }
         .card.danger { border-color:#fecaca; }
-        header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
+        .settings-page .card > header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
         .grid.two { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .row { display:flex; align-items:center; }
         .row.end { justify-content:flex-end; }
@@ -325,7 +325,7 @@ export default function SettingsPage() {
         .check { display:flex; align-items:center; gap:8px; }
         .hint { color:#64748b; font-size: 13px; margin-top: 6px; }
         .btn { padding:10px 14px; border-radius:10px; font-weight:600; border:1px solid #e5e7eb; background:#fff; }
-        .btn.primary { background:#2563eb; color:#fff; border-color:#2563eb; }
+        .btn.primary { background:#4338ca; color:#fff; border-color:#4338ca; }
         .btn.ghost { background:#fff; }
         .btn.danger { background:#ef4444; color:#fff; border-color:#ef4444; }
         @media (max-width: 760px) { .grid.two { grid-template-columns: 1fr; } }

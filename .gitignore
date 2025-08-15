@@ -37,8 +37,6 @@ next-env.d.ts
 
 # amplify
 .amplify
-amplify_outputs*
-amplifyconfiguration*
 
 # package-lock
 package-lock.json

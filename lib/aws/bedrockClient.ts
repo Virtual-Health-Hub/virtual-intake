@@ -25,7 +25,11 @@ export function bedrockClient(): BedrockRuntimeClient {
   if (_bedrock) return _bedrock;
   _bedrock = new BedrockRuntimeClient({
     region,
-    requestHandler: new NodeHttpHandler({ httpsAgent }),
+    requestHandler: new NodeHttpHandler({
+      httpsAgent,
+      requestTimeout: 30_000, // overall request timeout
+      connectionTimeout: 2_000, // initial TCP/TLS connect timeout
+    }),
   });
   return _bedrock;
 }
@@ -63,6 +67,7 @@ export async function streamBedrock(params: {
   onToken: (token: string) => void;
   onDone?: () => void;
   onError?: (err: unknown) => void;
+  signal?: AbortSignal; // allow caller to cancel
 }): Promise<void> {
   const client = bedrockClient();
   try {
@@ -72,7 +77,7 @@ export async function streamBedrock(params: {
       contentType: "application/json",
       body: JSON.stringify(params.body),
     });
-    const res = await client.send(cmd);
+    const res = await client.send(cmd, { abortSignal: params.signal as any });
 
     for await (const event of res.body ?? []) {
       const bytes = event.chunk?.bytes;
@@ -80,8 +85,25 @@ export async function streamBedrock(params: {
       const jsonStr = new TextDecoder().decode(bytes);
       try {
         const json = JSON.parse(jsonStr);
-        // Anthropic on Bedrock typically yields { type, delta: { text } } during streaming
-        const token: string = json?.delta?.text ?? json?.output_text ?? "";
+        // Handle common Bedrock streaming shapes (Anthropic on Bedrock):
+        // 1) { delta: { text: "..." } }
+        // 2) { type: 'content_block_delta', delta: { type: 'text_delta', text: '...' } }
+        // 3) { output_text: '...' } (final fallback in some impls)
+        let token = "";
+        if (json?.delta?.text) token = json.delta.text;
+        else if (
+          json?.type === "content_block_delta" &&
+          json?.delta?.type === "text_delta" &&
+          json?.delta?.text
+        )
+          token = json.delta.text;
+        else if (json?.output_text) token = json.output_text;
+        // Some providers may send arrays; try to pick first text element
+        else if (
+          Array.isArray(json?.output) &&
+          json.output[0]?.content?.[0]?.text
+        )
+          token = json.output[0].content[0].text;
         if (token) params.onToken(token);
       } catch {
         // ignore malformed chunks
@@ -89,7 +111,9 @@ export async function streamBedrock(params: {
     }
     params.onDone?.();
   } catch (err) {
-    params.onError?.(err);
+    // If aborted, surface as done; otherwise report
+    if ((err as any)?.name === "AbortError") params.onDone?.();
+    else params.onError?.(err);
   }
 }
 

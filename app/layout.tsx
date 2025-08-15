@@ -13,6 +13,7 @@ import {
   Authenticator,
   ThemeProvider,
 } from "@aws-amplify/ui-react";
+import { signOut as amplifySignOut } from "aws-amplify/auth";
 import "@aws-amplify/ui-react/styles.css";
 import outputs from "@/amplify_outputs.json";
 
@@ -85,7 +86,7 @@ const navLinks = [
 ];
 
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuthenticator((context) => [context.user]);
+  const { user } = useAuthenticator((context) => [context.user]);
   const authLoading = false; // placeholder if needed for future loading state
   const router = useRouter();
   const pathname = usePathname();
@@ -107,8 +108,13 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
   async function handleLogout() {
     try {
       setLoading(true);
-      await signOut();
-      router.replace("/login");
+      await amplifySignOut({ global: true });
+      if (typeof window !== "undefined") {
+        // Hard refresh so all client/server state resets after logout once tokens are revoked
+        window.location.replace("/login");
+      } else {
+        router.replace("/login");
+      }
     } catch (e) {
       console.error(e);
     }

@@ -64,8 +64,13 @@ function LoginHandler() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) router.replace("/");
-  }, [user, router]);
+    if (user) {
+      if (typeof window !== "undefined") {
+        // Hard refresh so the whole app (including Server Components) re-initializes with the signed-in user
+        window.location.replace("/");
+      }
+    }
+  }, [user]);
 
   return null;
 }

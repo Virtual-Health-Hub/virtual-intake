@@ -4,6 +4,7 @@ import {
   PollyClient,
   SynthesizeSpeechCommand,
   SynthesizeSpeechCommandInput,
+  type VoiceId,
 } from "@aws-sdk/client-polly";
 
 const region = process.env.AWS_REGION || "us-east-1";
@@ -24,7 +25,7 @@ export function pollyClient(): PollyClient {
 }
 
 export interface SynthesizeOptions {
-  voiceId?: string; // e.g., "Joanna"
+  voiceId?: VoiceId; // e.g., "Joanna"
   engine?: "neural" | "standard"; // default neural
   outputFormat?: "mp3" | "ogg_vorbis" | "pcm"; // audio container
   sampleRate?: string; // e.g., "22050" (Hz as string, Polly style)

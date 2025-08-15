@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   openTranscribe,
   OpenTranscribeHandle,
@@ -45,12 +39,7 @@ function mouthPathForViseme(v: string) {
 
 function Avatar({ mouthPath }: { mouthPath: string }) {
   return (
-    <svg
-      width={120}
-      height={120}
-      viewBox="0 0 80 80"
-      className="rounded-full shadow"
-    >
+    <svg width={120} height={120} viewBox="0 0 80 80" className="avatar">
       <circle cx="40" cy="40" r="36" fill="#f3ebe2" />
       <circle cx="28" cy="32" r="2.5" fill="#333" />
       <circle cx="52" cy="32" r="2.5" fill="#333" />
@@ -100,26 +89,34 @@ export default function ChatPage() {
       });
       txRef.current = handle;
       setListening(true);
+
+      // Kick off the interview immediately with Bedrock + Polly
+      runAssistant(
+        "Start the patient intake interview for a Canadian primary care walk-in clinic. Greet the patient briefly, then ask only the first, most relevant question to begin triage (keep it short)."
+      );
     } catch (e) {
       console.error(e);
     }
   }, [listening]);
 
   const stopListening = useCallback(async () => {
-    if (!listening) return;
     cancelStreamRef.current?.();
     await txRef.current?.stop();
     txRef.current = null;
     setListening(false);
-  }, [listening]);
+    setPartial("");
+  }, []);
 
   const runAssistant = useCallback(
     (userText: string) => {
-      // Cancel any ongoing stream
+      // Cancel any ongoing model stream
       cancelStreamRef.current?.();
       setAssistantLive("");
 
+      // Collect the final assistant text for message list
+      let finalText = "";
       const chunker = sentenceChunker((sentence) => {
+        // Polly TTS for each sentence chunk + visemes
         void enqueueTTS(sentence, "Joanna", onViseme);
       });
 
@@ -127,24 +124,17 @@ export default function ChatPage() {
         modelId: "anthropic.claude-3-5-sonnet-20240620-v1:0",
         onToken: (tok) => {
           setAssistantLive((prev) => prev + tok);
+          finalText += tok;
           chunker.feed(tok);
         },
         onDone: () => {
           chunker.flush();
-          setMessages((m) => [
-            ...m,
-            { role: "assistant", text: ((prev) => prev)("") },
-          ]);
-          // The above trick doesn't capture assistantLive; so use functional state read below
-          setMessages((m) => [
-            ...m,
-            {
-              role: "assistant",
-              text: (
-                document.getElementById("assistant-live")?.textContent || ""
-              ).trim(),
-            },
-          ]);
+          if (finalText.trim()) {
+            setMessages((m) => [
+              ...m,
+              { role: "assistant", text: finalText.trim() },
+            ]);
+          }
           setAssistantLive("");
         },
         onError: (e) => console.error("bedrock stream error", e),
@@ -155,101 +145,197 @@ export default function ChatPage() {
     [onViseme]
   );
 
-  // Render
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: 16 }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
-        Clinic Intake Assistant
-      </h1>
+    <div className="intake-page">
+      <header className="header">
+        <div className="title">
+          <h1>Clinic Intake Assistant</h1>
+          <p className="muted">
+            Voice-powered pre-visit interview using Transcribe, Bedrock, and
+            Polly.
+          </p>
+        </div>
+        <div className={`status ${listening ? "on" : "off"}`}>
+          <span className="dot" /> {listening ? "Listening" : "Idle"}
+        </div>
+      </header>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
+      <section className="intro">
         <Avatar mouthPath={mouth} />
-        <div style={{ fontSize: 14, color: "#555" }}>
-          <div style={{ fontWeight: 600 }}>
-            Hi! I can record your pre-visit details.
-          </div>
+        <div className="helper">
+          <div className="lead">I’ll guide you through a quick intake.</div>
           <div>
-            {listening ? "Listening…" : "Click Start to begin speaking."}
+            {listening ?
+              "I’m listening… answer out loud."
+            : "Press Start to begin."}
           </div>
           {partial && (
-            <div style={{ marginTop: 6, fontStyle: "italic", color: "#333" }}>
-              You: {partial}
+            <div className="partial">
+              <strong>You:</strong> {partial}
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {!listening ? (
-          <button onClick={startListening} style={btnStyle}>
+      <div className="controls">
+        {!listening ?
+          <button
+            onClick={startListening}
+            className="btn primary"
+            type="button"
+          >
             Start
           </button>
-        ) : (
-          <button onClick={stopListening} style={btnStopStyle}>
+        : <button onClick={stopListening} className="btn danger" type="button">
             Stop
           </button>
-        )}
+        }
       </div>
 
-      <div style={{ display: "grid", gap: 10 }}>
+      <section
+        className="chat"
+        aria-live="polite"
+        aria-relevant="additions text"
+      >
         {messages.map((m, i) => (
-          <div key={i} style={m.role === "user" ? userBubble : aiBubble}>
+          <div key={i} className={`msg ${m.role === "user" ? "user" : "ai"}`}>
             {m.text}
           </div>
         ))}
         {assistantLive && (
-          <div id="assistant-live" style={aiBubble}>
+          <div className="msg ai">
             {assistantLive}
-            <span className="blink">▌</span>
+            <span className="blink" aria-hidden>
+              ▌
+            </span>
           </div>
         )}
-      </div>
+      </section>
 
-      <style>{`
-        .blink { animation: blink 1s steps(2, start) infinite; }
-        @keyframes blink { to { visibility: hidden; } }
-        button { cursor: pointer; }
+      <style jsx>{`
+        .intake-page {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+        .title h1 {
+          font-size: 1.4rem;
+          margin: 0 0 4px;
+        }
+        .title .muted {
+          margin: 0;
+          color: #64748b;
+          font-size: 0.95rem;
+        }
+        .status {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          font-weight: 600;
+        }
+        .status .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          display: inline-block;
+        }
+        .status.on {
+          background: #ecfdf5;
+          color: #065f46;
+        }
+        .status.on .dot {
+          background: #10b981;
+        }
+        .status.off {
+          background: #f1f5f9;
+          color: #334155;
+        }
+        .status.off .dot {
+          background: #94a3b8;
+        }
+
+        .intro {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          background: #ffffff;
+          margin-bottom: 12px;
+        }
+        .avatar {
+          border-radius: 9999px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+        .helper .lead {
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        .helper .partial {
+          margin-top: 6px;
+          font-style: italic;
+          color: #334155;
+        }
+
+        .controls {
+          display: flex;
+          gap: 10px;
+          margin: 12px 0 16px;
+        }
+        .btn.danger {
+          background: #ef4444;
+          color: #fff;
+          border: none;
+        }
+        .btn.danger:hover {
+          background: #dc2626;
+        }
+
+        .chat {
+          display: grid;
+          gap: 10px;
+          padding: 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          background: #fcfcfc;
+        }
+        .msg {
+          padding: 12px 14px;
+          border-radius: 12px;
+          line-height: 1.5;
+          border: 1px solid transparent;
+          white-space: pre-wrap;
+        }
+        .msg.user {
+          justify-self: end;
+          background: #eef6ff;
+          border-color: #cfe4ff;
+        }
+        .msg.ai {
+          justify-self: start;
+          background: #f7f7f7;
+          border-color: #e9e9e9;
+        }
+
+        .blink {
+          animation: blink 1s steps(2, start) infinite;
+        }
+        @keyframes blink {
+          to {
+            visibility: hidden;
+          }
+        }
       `}</style>
     </div>
   );
 }
-
-const btnStyle: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: 8,
-  border: "1px solid #e2e2e2",
-  background: "#0ea5e9",
-  color: "white",
-  fontWeight: 600,
-};
-
-const btnStopStyle: React.CSSProperties = {
-  ...btnStyle,
-  background: "#ef4444",
-};
-
-const baseBubble: React.CSSProperties = {
-  padding: 12,
-  borderRadius: 12,
-  lineHeight: 1.5,
-};
-
-const userBubble: React.CSSProperties = {
-  ...baseBubble,
-  background: "#eef6ff",
-  border: "1px solid #cfe4ff",
-  alignSelf: "end",
-};
-
-const aiBubble: React.CSSProperties = {
-  ...baseBubble,
-  background: "#f7f7f7",
-  border: "1px solid #e9e9e9",
-};

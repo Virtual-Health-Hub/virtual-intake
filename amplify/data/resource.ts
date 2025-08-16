@@ -13,12 +13,7 @@ const schema = a.schema({
       isDone: a.boolean(),
       owner: a.string(),
     })
-    .authorization((allow) => [
-      // Owner-only full access via Cognito User Pools (JWT)
-      allow.owner(),
-      // Optionally allow any signed-in user to read (remove this line if you want strict owner-only)
-      allow.authenticated().to(["read"]),
-    ]),
+    .authorization((allow) => [allow.guest()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;

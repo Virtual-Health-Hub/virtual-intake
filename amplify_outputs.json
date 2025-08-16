@@ -1,13 +1,19 @@
 {
   "auth": {
-    "user_pool_id": "us-east-1_5upfQOgBD",
+    "user_pool_id": "us-east-1_2AI3samGS",
     "aws_region": "us-east-1",
-    "user_pool_client_id": "6ifcd359h017r6qvoaufse11ll",
-    "identity_pool_id": "us-east-1:c40036b2-4dd8-4023-8eb3-505d30946aa7",
+    "user_pool_client_id": "272t6fbim8h8hne8h22m5qfffp",
+    "identity_pool_id": "us-east-1:42454e1d-6c0e-4689-b34c-2fc990362372",
     "mfa_methods": [],
-    "standard_required_attributes": ["email"],
-    "username_attributes": ["email"],
-    "user_verification_types": ["email"],
+    "standard_required_attributes": [
+      "email"
+    ],
+    "username_attributes": [
+      "email"
+    ],
+    "user_verification_types": [
+      "email"
+    ],
     "groups": [],
     "mfa_configuration": "NONE",
     "password_policy": {
@@ -20,10 +26,12 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://mnqubmued5gefak6ixuxqgltfi.appsync-api.us-east-1.amazonaws.com/graphql",
+    "url": "https://lijuh2wcafdadnglmynuuf54si.appsync-api.us-east-1.amazonaws.com/graphql",
     "aws_region": "us-east-1",
-    "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
-    "authorization_types": ["AWS_IAM"],
+    "default_authorization_type": "AWS_IAM",
+    "authorization_types": [
+      "AMAZON_COGNITO_USER_POOLS"
+    ],
     "model_introspection": {
       "version": 1,
       "models": {
@@ -48,13 +56,6 @@
               "name": "isDone",
               "isArray": false,
               "type": "Boolean",
-              "isRequired": false,
-              "attributes": []
-            },
-            "owner": {
-              "name": "owner",
-              "isArray": false,
-              "type": "String",
               "isRequired": false,
               "attributes": []
             },
@@ -87,9 +88,13 @@
               "properties": {
                 "rules": [
                   {
-                    "allow": "public",
-                    "provider": "iam",
-                    "operations": ["create", "update", "delete", "read"]
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
                   }
                 ]
               }
@@ -106,5 +111,5 @@
       "nonModels": {}
     }
   },
-  "version": "1.3"
+  "version": "1.4"
 }

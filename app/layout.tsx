@@ -86,47 +86,46 @@ const navLinks = [
 ];
 
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthenticator((context) => [context.user]);
-  const authLoading = false; // placeholder if needed for future loading state
+  const { user, authStatus } = useAuthenticator((ctx) => [
+    ctx.user,
+    ctx.authStatus,
+  ]);
+  // authStatus can be: 'configuring' | 'unauthenticated' | 'authenticated'
+  const [loading, setLoading] = React.useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const [authChecked, setAuthChecked] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-
   React.useEffect(() => {
-    setAuthChecked(true);
-  }, []);
-
-  React.useEffect(() => {
-    if (!authChecked || authLoading) return;
-    if (pathname !== "/login" && !user) {
+    if (pathname === "/login") return; // let /login render publicly
+    if (authStatus === "configuring") return; // wait for session check
+    if (authStatus === "unauthenticated") {
       router.replace("/login");
     }
-  }, [authChecked, authLoading, pathname, user, router]);
+  }, [authStatus, pathname, router]);
 
   async function handleLogout() {
     try {
       setLoading(true);
       await amplifySignOut({ global: true });
-      if (typeof window !== "undefined") {
-        // Hard refresh so all client/server state resets after logout once tokens are revoked
-        window.location.replace("/login");
-      } else {
-        router.replace("/login");
-      }
+      router.replace("/login");
     } catch (e) {
       console.error(e);
+    } finally {
+      setLoading(false);
     }
   }
 
-  // Let /login render publicly without shell
+  // Public login route
   if (pathname === "/login") {
     return <>{children}</>;
   }
-  // For all other routes, require auth
-  if (authLoading || !user) {
-    return <Loader />; // redirect happens in useEffect (client-only)
+  // While Amplify Auth is checking the current user, show loader
+  if (authStatus === "configuring") {
+    return <Loader />;
+  }
+  // If not authenticated, we'll redirect via effect; show loader to avoid flicker
+  if (authStatus !== "authenticated") {
+    return <Loader />;
   }
   if (loading) {
     return <Loader />;

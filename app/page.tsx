@@ -58,8 +58,9 @@ export default function DashboardPage() {
         .dashboard {
           width: 100%;
           padding: 2rem;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-            Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+          font-family:
+            -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+            Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
           color: #475569;
           background-color: #f9fafb;
           box-sizing: border-box;
@@ -71,10 +72,10 @@ export default function DashboardPage() {
           align-items: center;
           margin-bottom: 2rem;
           background: #fff;
-      
+
           border-radius: 8px;
           padding: 1.5rem;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
         .dashboard-header h1 {
           font-size: 2rem;
@@ -108,7 +109,7 @@ export default function DashboardPage() {
           border-radius: 8px;
           padding: 1.5rem;
           text-align: center;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
         .card h2 {
           margin: 0 0 0.5rem 0;
@@ -128,7 +129,9 @@ export default function DashboardPage() {
           gap: 2rem;
         }
         @media (max-width: 768px) {
-          .two-column { grid-template-columns: 1fr; }
+          .two-column {
+            grid-template-columns: 1fr;
+          }
         }
         .recent-activity,
         .quick-actions {
@@ -136,7 +139,7 @@ export default function DashboardPage() {
           border: 1px solid #e5e7eb;
           border-radius: 8px;
           padding: 1.5rem;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
         .recent-activity h3,
         .quick-actions h3 {
@@ -173,7 +176,9 @@ export default function DashboardPage() {
           font-weight: 600;
           transition: background-color 0.2s ease;
         }
-        .quick-actions :global(.btn):hover { background-color: #1d4ed8; }
+        .quick-actions :global(.btn):hover {
+          background-color: #1d4ed8;
+        }
       `}</style>
       <style jsx global>{`
         .dashboard .btn {
@@ -181,11 +186,26 @@ export default function DashboardPage() {
           text-decoration: none;
           line-height: 1.25;
         }
-        .dashboard .btn:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
-        .dashboard .btn.primary { background-color: #2563eb; color: white; border: none; }
-        .dashboard .btn.primary:hover { background-color: #1d4ed8; }
-        .dashboard .btn.secondary { background-color: #f1f5f9; color: #1e293b; border: none; }
-        .dashboard .btn.secondary:hover { background-color: #e2e8f0; }
+        .dashboard .btn:focus-visible {
+          outline: 2px solid #1d4ed8;
+          outline-offset: 2px;
+        }
+        .dashboard .btn.primary {
+          background-color: #2563eb;
+          color: white;
+          border: none;
+        }
+        .dashboard .btn.primary:hover {
+          background-color: #1d4ed8;
+        }
+        .dashboard .btn.secondary {
+          background-color: #f1f5f9;
+          color: #1e293b;
+          border: none;
+        }
+        .dashboard .btn.secondary:hover {
+          background-color: #e2e8f0;
+        }
       `}</style>
     </main>
   );

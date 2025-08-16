@@ -8,7 +8,7 @@ backend:
     build:
       commands:
         - npm i --cache .npm --prefer-offline
-        - AWS_REGION=us-east-1 npx ampx pipeline-deploy --branch main --app-id d37jpzx9lqn7bd
+        - AWS_REGION=us-east-1 npx ampx pipeline-deploy --branch main --app-id d3ah55ckt7q566
 frontend:
   phases:
     preBuild:

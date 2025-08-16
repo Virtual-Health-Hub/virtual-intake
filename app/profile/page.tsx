@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  getCurrentUser,
-  fetchAuthSession,
-  updateUserAttributes,
-  sendUserAttributeVerificationCode,
-  confirmUserAttribute,
-} from "aws-amplify/auth";
+import { useAuthenticator } from "@aws-amplify/ui-react";
 
 function initialsFrom(name: string) {
   const parts = name.trim().split(/\s+/).slice(0, 2);
@@ -21,93 +15,27 @@ export default function ProfilePage() {
 
   // Attributes
   const [email, setEmail] = useState("");
-  const [emailVerified, setEmailVerified] = useState<boolean>(false);
   const [givenName, setGivenName] = useState("");
   const [familyName, setFamilyName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [birthdate, setBirthdate] = useState("");
 
-  // Email verify flow
-  const [emailPending, setEmailPending] = useState(false);
-  const [verifyCode, setVerifyCode] = useState("");
+  const { user } = useAuthenticator((ctx) => [ctx.user]);
+
+  useEffect(() => {
+    if (!user) return;
+    setUserId(user.userId ?? "");
+    setUsername(user.username ?? "");
+    // Best-effort email: Amplify UI exposes loginId when username is email
+    const loginId = (user as any)?.signInDetails?.loginId ?? "";
+    setEmail(String(loginId));
+  }, [user]);
 
   const displayName = useMemo(() => {
     const n = `${givenName} ${familyName}`.trim();
     return n || email || username || "User";
   }, [givenName, familyName, email, username]);
-
-  // Load current user + attributes from ID token
-  useEffect(() => {
-    (async () => {
-      try {
-        const me = await getCurrentUser();
-        setUserId(me.userId);
-        setUsername(me.username);
-        const session = await fetchAuthSession();
-        const p: any = session.tokens?.idToken?.payload || {};
-        setEmail(String(p.email || ""));
-        setEmailVerified(Boolean(p.email_verified));
-        setGivenName(String(p.given_name || ""));
-        setFamilyName(String(p.family_name || ""));
-        setPhone(String(p.phone_number || ""));
-        setAddress(String(p.address || ""));
-        setBirthdate(String(p.birthdate || ""));
-      } catch (e) {
-        console.error("Failed to load profile", e);
-      }
-    })();
-  }, []);
-
-  async function saveProfile() {
-    try {
-      // Update non-email attributes. Email often requires a separate verification flow.
-      await updateUserAttributes({
-        userAttributes: {
-          given_name: givenName || undefined,
-          family_name: familyName || undefined,
-          phone_number: phone || undefined,
-          address: address || undefined,
-          birthdate: birthdate || undefined,
-        },
-      });
-      alert("Profile updated.");
-    } catch (e) {
-      console.error(e);
-      alert("Update failed. Please try again.");
-    }
-  }
-
-  async function startEmailChange() {
-    if (!email) return alert("Please enter an email.");
-    try {
-      await updateUserAttributes({ userAttributes: { email } });
-      await sendUserAttributeVerificationCode({ userAttributeKey: "email" });
-      setEmailPending(true);
-      alert("Verification code sent to your email.");
-    } catch (e) {
-      console.error(e);
-      alert("Could not start email verification.");
-    }
-  }
-
-  async function verifyEmail() {
-    if (!verifyCode)
-      return alert("Enter the verification code that was emailed to you.");
-    try {
-      await confirmUserAttribute({
-        userAttributeKey: "email",
-        confirmationCode: verifyCode,
-      });
-      setEmailPending(false);
-      setVerifyCode("");
-      setEmailVerified(true);
-      alert("Email verified.");
-    } catch (e) {
-      console.error(e);
-      alert("Verification failed. Check the code and try again.");
-    }
-  }
 
   return (
     <div className="profile-page">
@@ -133,40 +61,14 @@ export default function ProfilePage() {
           </div>
           <div>
             <label className="label">Email</label>
-            <div className="row gap">
-              <input
-                className="input"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-              <button className="btn" onClick={startEmailChange}>
-                Update
-              </button>
-            </div>
-            <div className="hint">
-              Status:{" "}
-              {emailVerified
-                ? "Verified"
-                : emailPending
-                ? "Pending verification"
-                : "Unverified"}
-            </div>
-            {emailPending && (
-              <div className="row gap" style={{ marginTop: 8 }}>
-                <input
-                  className="input"
-                  type="text"
-                  value={verifyCode}
-                  onChange={(e) => setVerifyCode(e.target.value)}
-                  placeholder="Enter verification code"
-                />
-                <button className="btn primary" onClick={verifyEmail}>
-                  Verify
-                </button>
-              </div>
-            )}
+            <input
+              className="input"
+              type="email"
+              value={email}
+              disabled
+              readOnly
+              placeholder="you@example.com"
+            />
           </div>
         </div>
       </section>
@@ -218,11 +120,6 @@ export default function ProfilePage() {
               onChange={(e) => setAddress(e.target.value)}
             />
           </div>
-        </div>
-        <div className="row end">
-          <button className="btn primary" onClick={saveProfile}>
-            Save changes
-          </button>
         </div>
       </section>
 

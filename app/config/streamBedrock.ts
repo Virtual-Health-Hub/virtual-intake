@@ -24,6 +24,8 @@ export type StreamBedrockOptions = {
   headers?: Record<string, string>;
 };
 
+export const DEFAULT_BEDROCK_MODEL_ID = "openai.gpt-oss-20b-1:0";
+
 export async function streamBedrock(
   prompt: string,
   opts: StreamBedrockOptions
@@ -34,16 +36,22 @@ export async function streamBedrock(
     ...(opts.headers || {}),
   };
 
+  const modelId = opts.modelId ?? DEFAULT_BEDROCK_MODEL_ID;
+
   const res = await fetch("/api/bedrock/stream", {
     method: "POST",
     headers,
-    body: JSON.stringify({ prompt, modelId: opts.modelId }),
+    body: JSON.stringify({ prompt, modelId }),
     signal: controller.signal,
   });
 
   if (!res.ok || !res.body) {
+    let errorText = "";
+    try {
+      errorText = await res.text();
+    } catch {}
     const err = new Error(
-      `Bedrock stream failed: ${res.status} ${res.statusText}`
+      `Bedrock stream failed: ${res.status} ${res.statusText}${errorText ? ` - ${errorText}` : ""}`
     );
     opts.onError?.(err);
     throw err;
@@ -60,33 +68,41 @@ export async function streamBedrock(
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
 
-        // SSE frames are separated by double newlines. We'll parse line-by-line.
-        let idx: number;
-        while ((idx = buffer.indexOf("\n")) !== -1) {
-          const line = buffer.slice(0, idx).trimEnd();
-          buffer = buffer.slice(idx + 1);
+        // Process complete SSE frames separated by double newlines (\n\n or \r\n\r\n)
+        let delimiterIndex: number;
+        while (
+          (delimiterIndex = buffer.indexOf("\n\n")) !== -1 ||
+          (delimiterIndex = buffer.indexOf("\r\n\r\n")) !== -1
+        ) {
+          const rawEvent = buffer.slice(0, delimiterIndex);
+          buffer = buffer.slice(
+            delimiterIndex + (buffer[delimiterIndex] === "\r" ? 4 : 2)
+          );
 
-          if (!line) continue; // skip keep-alives
+          if (!rawEvent.trim()) continue; // skip empty frames (keep-alives)
 
-          if (line.startsWith("event:")) {
-            // Example: event:done (we expect a following data: line but we gracefully handle either)
-            const evt = line.slice(6).trim();
-            if (evt === "done") {
-              // Drain remaining lines
-              opts.onDone?.();
-              try {
-                controller.abort();
-              } catch {}
-              return;
+          const lines = rawEvent.split(/\r?\n/);
+          let eventType = "";
+          let dataLines: string[] = [];
+
+          for (const line of lines) {
+            if (line.startsWith("event:")) {
+              eventType = line.slice(6).trim();
+            } else if (line.startsWith("data:")) {
+              dataLines.push(line.slice(5));
             }
-            continue;
           }
 
-          if (line.startsWith("data:")) {
-            const payload = line.slice(5);
-            // Our server streams raw token text as data: lines
-            if (payload) opts.onToken(payload);
-            continue;
+          const data = dataLines.join("\n");
+
+          if (eventType === "done") {
+            opts.onDone?.();
+            try {
+              controller.abort();
+            } catch {}
+            return;
+          } else if (data) {
+            opts.onToken(data);
           }
         }
       }

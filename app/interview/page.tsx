@@ -5,7 +5,10 @@ import {
   openTranscribe,
   OpenTranscribeHandle,
 } from "@/app/config/openTranscribe";
-import { streamBedrock } from "@/app/config/streamBedrock";
+import {
+  streamBedrock,
+  DEFAULT_BEDROCK_MODEL_ID,
+} from "@/app/config/streamBedrock";
 import { sentenceChunker } from "@/app/config/sentenceChunker";
 import { enqueueTTS, clearQueue } from "@/lib/audioQueue";
 
@@ -86,7 +89,8 @@ export default function ChatPage() {
       });
 
       streamBedrock(userText, {
-        modelId: "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        // OpenAI GPT‑OSS on Bedrock (us-west-2). Ensure backend client region is us-west-2.
+        modelId: DEFAULT_BEDROCK_MODEL_ID,
         onToken: (tok) => {
           setAssistantLive((prev) => prev + tok);
           finalText += tok;

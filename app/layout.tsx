@@ -7,7 +7,15 @@ import "./app.css";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import {
+  LogOut,
+  Home,
+  FileText,
+  User,
+  Settings,
+  Bell,
+  MessageSquare,
+} from "lucide-react";
 import {
   useAuthenticator,
   Authenticator,
@@ -77,12 +85,12 @@ const amplifyTheme = {
 };
 
 const navLinks = [
-  { href: "/", label: "Dashboard" },
-  { href: "/interview", label: "Interview" },
-  { href: "/forms", label: "Forms" },
-  { href: "/notifications", label: "Notifications" },
-  { href: "/profile", label: "Profile" },
-  { href: "/settings", label: "Settings" },
+  { href: "/", icon: Home },
+  { href: "/interview", icon: MessageSquare },
+  { href: "/forms", icon: FileText },
+  { href: "/profile", icon: User },
+  { href: "/settings", icon: Settings },
+  { href: "/notifications", icon: Bell },
 ];
 
 function LayoutWithAuth({ children }: { children: React.ReactNode }) {
@@ -152,7 +160,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
                   href={l.href}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  {l.label}
+                  <l.icon size={22} />
                 </Link>
               );
             })}
@@ -162,7 +170,7 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
               type="button"
               title="Logout"
             >
-              <LogOut size={28} aria-hidden="true" />
+              <LogOut size={22} aria-hidden="true" />
             </button>
           </nav>
         </div>
@@ -219,7 +227,6 @@ function LayoutWithAuth({ children }: { children: React.ReactNode }) {
           border: none;
           color: #b91c1c;
           cursor: pointer;
-          padding: 8px 10px;
           border-radius: 8px;
           font: inherit;
           font-weight: 500;

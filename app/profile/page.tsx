@@ -229,7 +229,7 @@ export default function ProfilePage() {
       {/* Compliance note */}
       <section className="card subtle">
         <p className="hint">
-          We store only what's necessary for your pre-visit intake. You can
+          We store only what&#39;s necessary for your pre-visit intake. You can
           request an export or deletion from the Settings page.
         </p>
       </section>

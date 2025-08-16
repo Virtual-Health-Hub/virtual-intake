@@ -72,41 +72,6 @@ export default function ChatPage() {
     setMouth(mouthPathForViseme(v));
   }, []);
 
-  const startListening = useCallback(async () => {
-    if (listening) return;
-    setAssistantLive("");
-    setPartial("");
-    try {
-      const handle = await openTranscribe({
-        language: "en-US",
-        onPartial: (t) => setPartial(t),
-        onFinal: (t) => {
-          setPartial("");
-          setMessages((m) => [...m, { role: "user", text: t }]);
-          runAssistant(t);
-        },
-        onError: (e) => console.error("transcribe error", e),
-      });
-      txRef.current = handle;
-      setListening(true);
-
-      // Kick off the interview immediately with Bedrock + Polly
-      runAssistant(
-        "Start the patient intake interview for a Canadian primary care walk-in clinic. Greet the patient briefly, then ask only the first, most relevant question to begin triage (keep it short)."
-      );
-    } catch (e) {
-      console.error(e);
-    }
-  }, [listening]);
-
-  const stopListening = useCallback(async () => {
-    cancelStreamRef.current?.();
-    await txRef.current?.stop();
-    txRef.current = null;
-    setListening(false);
-    setPartial("");
-  }, []);
-
   const runAssistant = useCallback(
     (userText: string) => {
       // Cancel any ongoing model stream
@@ -144,6 +109,41 @@ export default function ChatPage() {
     },
     [onViseme]
   );
+
+  const startListening = useCallback(async () => {
+    if (listening) return;
+    setAssistantLive("");
+    setPartial("");
+    try {
+      const handle = await openTranscribe({
+        language: "en-US",
+        onPartial: (t) => setPartial(t),
+        onFinal: (t) => {
+          setPartial("");
+          setMessages((m) => [...m, { role: "user", text: t }]);
+          runAssistant(t);
+        },
+        onError: (e) => console.error("transcribe error", e),
+      });
+      txRef.current = handle;
+      setListening(true);
+
+      // Kick off the interview immediately with Bedrock + Polly
+      runAssistant(
+        "Start the patient intake interview for a Canadian primary care walk-in clinic. Greet the patient briefly, then ask only the first, most relevant question to begin triage (keep it short)."
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }, [listening, runAssistant]);
+
+  const stopListening = useCallback(async () => {
+    cancelStreamRef.current?.();
+    await txRef.current?.stop();
+    txRef.current = null;
+    setListening(false);
+    setPartial("");
+  }, []);
 
   return (
     <div className="intake-page">

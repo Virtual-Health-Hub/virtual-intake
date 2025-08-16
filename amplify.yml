@@ -8,7 +8,10 @@ backend:
     build:
       commands:
         - npm i --cache .npm --prefer-offline
+        - rm -f amplify_outputs.json
         - AWS_REGION=us-east-1 npx ampx pipeline-deploy --branch main --app-id d37jpzx9lqn7bd
+        - 'test -f amplify_outputs.json || { echo "[ERROR] amplify_outputs.json missing after backend deploy"; exit 1; }'
+        - node -e "const o=require('./amplify_outputs.json'); console.log('[Amplify outputs after backend deploy]', { pool:o.auth?.user_pool_id, api:o.data?.url, region:o.auth?.aws_region || o.data?.aws_region });"
 frontend:
   phases:
     preBuild:
